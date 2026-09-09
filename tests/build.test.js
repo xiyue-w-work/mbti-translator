@@ -6,5 +6,5 @@ test('public demo builds with relative assets and an offline-only config',()=>{
  const bundle=JSON.parse(fs.readFileSync('dist/bundle.json','utf8'));
  assert.equal(bundle.modules['config.js'],'module.exports={demoMode:true,apiBaseUrl:""};');
  assert.ok(bundle.modules['utils/personality.js']);assert.ok(bundle.templates.result);
- assert.deepEqual(fs.readdirSync('dist').sort(),['.nojekyll','bundle.json','index.html','runtime.js']);
+ assert.deepEqual(fs.readdirSync('dist').sort(),['.nojekyll','bundle.json','index.html','runtime.js','text-input.js']);
 });

@@ -33,7 +33,7 @@ flowchart LR
 | `preview/` | 复用 WXML/WXSS 的浏览器预览适配器 |
 | `server/` | 可配置模型接口、校验、超时与开发限流 |
 | `scripts/build-demo.js` | 生成无服务端依赖的 `dist/` |
-| `tests/` | 18 项自动化测试 |
+| `tests/` | 21 项自动化测试 |
 | `docs/research/` | 来源、编辑推导与证据边界 |
 | `.github/workflows/pages.yml` | 测试、构建与自动部署 |
 

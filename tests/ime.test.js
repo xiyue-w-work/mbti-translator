@@ -1,0 +1,7 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {bindTextInput}=require('../preview/text-input');
+function setup(){const el=new EventTarget();el.value='';const pending=new Map();let id=0;const seen=[];bindTextInput(el,()=>seen.push(el.value),{schedule:fn=>{pending.set(++id,fn);return id;},cancel:key=>pending.delete(key)});return {el,seen,flush(){for(const [key,fn] of pending){pending.delete(key);fn();}},event(type,value,isComposing=false){el.value=value;const event=new Event(type);event.isComposing=isComposing;el.dispatchEvent(event);}};}
+test('Chinese composition never commits intermediate pinyin and commits final text once',()=>{const s=setup();s.event('compositionstart','');s.event('input','ni',true);s.flush();assert.deepEqual(s.seen,[]);s.event('compositionend','你');s.event('input','你');s.flush();assert.deepEqual(s.seen,['你']);});
+test('consecutive composition sessions do not destroy an active session',()=>{const s=setup();s.event('compositionstart','');s.event('compositionend','你');s.event('compositionstart','你');s.flush();assert.deepEqual(s.seen,[]);s.event('input','你hao',true);s.event('compositionend','你好');s.flush();assert.deepEqual(s.seen,['你好']);});
+test('cancelled composition, paste and ordinary input are committed',()=>{const s=setup();s.event('compositionstart','');s.event('compositionend','');s.flush();s.event('input','粘贴内容');s.flush();s.event('input','粘贴内容a');s.flush();assert.deepEqual(s.seen,['','粘贴内容','粘贴内容a']);});

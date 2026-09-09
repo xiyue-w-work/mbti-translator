@@ -35,9 +35,12 @@
   if(tag==='picker'){const selected=Number(value(attr('value'),scope));value(attr('range'),scope).forEach((text,i)=>{const option=document.createElement('option');option.textContent=text;option.value=i;option.selected=i===selected;el.append(option);});}
   else for(const child of node.childNodes)renderNode(child,scope,el);
   if(tag==='input'||tag==='textarea')el.value=value(attr('value'),scope)||'';
-  for(const [binding,event] of [['bindtap','click'],['bindinput','input'],['bindchange','change']])if(attr(binding))el.addEventListener(event,()=>{
-   const instance=instances[current];instance[attr(binding)]({currentTarget:{dataset:{...el.dataset}},detail:{value:el.value}});
-  });
+  for(const [binding,event] of [['bindtap','click'],['bindinput','input'],['bindchange','change']])if(attr(binding)){
+   const instance=instances[current];
+   const notify=()=>{if(instances[current]!==instance||!el.isConnected)return;instance[attr(binding)]({currentTarget:{dataset:{...el.dataset}},detail:{value:el.value}});};
+   if(binding==='bindinput'&&(tag==='input'||tag==='textarea'))window.MbtiTextInput.bindTextInput(el,notify);
+   else el.addEventListener(event,notify);
+  }
   parent.append(el);
  }
  const templates={};for(const name of ['index','result']){
