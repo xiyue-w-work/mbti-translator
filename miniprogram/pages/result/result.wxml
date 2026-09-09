@@ -1,0 +1,26 @@
+<view class="page" wx:if="{{result}}">
+ <view class="row"><text class="eyebrow">A LITTLE CLOSER</text><text class="pill">{{sceneName}}</text></view>
+ <view class="title">意思不变，<view>表达多一种可能。</view></view>
+ <view class="subtitle">{{result.demo ? '同一句示例，切换对方人格，比较不同表达。' : '挑选最像你的版本，再按自己的习惯调整。'}}</view>
+ <view class="banner" wx:if="{{result.demo}}">当前按对方 MBTI 编辑场景示例；任意原话、我的 MBTI 和补充偏好的个性化改写仍需接入 AI。<view class="demo-original">示例原话：{{result.exampleOriginal}}</view></view>
+ <view class="pair" wx:else>{{request.mine}} <text>→</text> {{request.theirs}}<text class="muted"> · 沟通偏好参考</text></view>
+ <view class="card profile" wx:if="{{result.profile}}">
+  <view class="row"><text class="label">这次怎样表达</text><text class="pill">{{result.profile.type}}</text></view>
+  <view wx:if="{{result.demo}}" class="compare-picker"><text class="muted">切换接收方，直接比较正文</text><picker range="{{types}}" value="{{receiverIndex}}" bindchange="selectReceiver"><view class="receiver">{{types[receiverIndex]}} ⌄</view></picker></view>
+  <view class="rule-item" wx:for="{{result.profile.rules}}" wx:key="letter"><text class="rule-letter">{{item.letter}}</text><view><text class="rule-title">{{item.title}}</text><view class="muted">{{item.action}}</view></view></view>
+  <view class="muted" wx:if="{{!result.profile.rules.length}}">类型未知，先按事实、感受和诉求表达。</view>
+  <button class="text-button" bindtap="toggleSources">{{showSources ? '收起资料依据 −' : '为什么这样改？查看资料依据 ＋'}}</button>
+  <view wx:if="{{showSources}}"><view class="muted">{{result.profile.notice}}</view><button class="source-link" wx:for="{{result.profile.sources}}" wx:key="id" data-url="{{item.url}}" bindtap="copySource">{{item.title}} ↗ 复制链接</button></view>
+ </view>
+ <view class="original" bindtap="toggleOriginal"><view class="row"><text>你原本想说的话</text><text>{{showOriginal ? '−' : '＋'}}</text></view><view wx:if="{{showOriginal}}" class="original-text">{{request.text}}</view></view>
+ <view wx:if="{{error}}" class="error" role="alert">{{error}}</view>
+ <view wx:if="{{busy}}" class="banner">正在调整表达，请稍等…</view>
+ <view class="card version" wx:for="{{result.versions}}" wx:key="style" wx:for-item="version" wx:for-index="versionIndex">
+  <view class="row"><view class="version-heading"><text class="number">0{{versionIndex + 1}}</text><text class="label">{{version.style}}</text></view><button class="copy" data-index="{{versionIndex}}" bindtap="copy">复制</button></view>
+  <text class="version-text" selectable="{{true}}">{{version.text}}</text>
+  <view class="reason">✦ {{version.reason}}</view>
+  <view wx:if="{{!result.demo}}" class="refinements"><button wx:for="{{directions}}" wx:key="*this" data-index="{{versionIndex}}" data-direction="{{item}}" bindtap="refine" disabled="{{busy}}">{{item}}</button></view>
+ </view>
+ <button class="secondary back" bindtap="back">← 返回修改原话</button>
+ <view class="note">MBTI 仅作参考，真实沟通偏好更重要。<view>选择适合你的表达，保留自己的立场。</view></view>
+</view>
