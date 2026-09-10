@@ -13,8 +13,11 @@ test('unconfigured live translation fails rather than inventing a translation',a
  await assert.rejects(translate(input,{env:{}}),/尚未配置/);
 });
 test('demo is explicitly labeled and uses a fixed example',async()=>{
- const result=await translate(input,{env:{DEMO_MODE:'true'}});
+ const result=await translate({...input,text:'我这周很累，周末不想一起出去。'},{env:{DEMO_MODE:'true'}});
  assert.equal(result.demo,true); assert.equal(result.versions.length,3); assert.ok(result.exampleOriginal);
+});
+test('demo rejects arbitrary text rather than substituting a fixed answer',async()=>{
+ await assert.rejects(translate(input,{env:{DEMO_MODE:'true'}}),/公开演示.*自定义内容/);
 });
 test('invalid or missing model fields are rejected',()=>{
  for(const raw of ['not json','{}',JSON.stringify({versions:[{style:'自然直接',text:'',reason:''}]})]) assert.throws(()=>parseResult(raw));

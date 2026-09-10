@@ -1,5 +1,6 @@
 const {scenes,styles}=require('./catalog');
 const {profileFor}=require('./personality');
+const DEMO_CUSTOM_INPUT_MESSAGE='公开演示尚未接入 AI，不能翻译自定义内容。请点击“试试一个例子”查看人格适配示例。';
 // Original Chinese examples composed from four preference axes; no efficacy claims.
 const bodies={
  love:{
@@ -39,4 +40,9 @@ function demoResult(request){
   '类型未知，使用事实与明确诉求，不推测对方偏好。'}));
  return {demo:true,exampleOriginal:scene.example,versions,profile};
 }
-module.exports={demoResult};
+function isDemoExample(request){
+ const input=request||{};
+ const scene=scenes.find(s=>s.id===input.scene);
+ return !!scene&&typeof input.text==='string'&&input.text.trim()===scene.example;
+}
+module.exports={demoResult,isDemoExample,DEMO_CUSTOM_INPUT_MESSAGE};

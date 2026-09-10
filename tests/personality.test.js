@@ -20,8 +20,9 @@ test('unknown receiver stays neutral and demo admits arbitrary text is not rewri
 });
 test('client demo adapter carries receiver type end to end',async()=>{
  const api=require('../miniprogram/utils/api');
- const a=await api.translate({scene:'work',theirs:'ISTJ'});
- const b=await api.translate({scene:'work',theirs:'ENFP'});
+ const text=scenes.find(scene=>scene.id==='work').example;
+ const a=await api.translate({scene:'work',theirs:'ISTJ',text});
+ const b=await api.translate({scene:'work',theirs:'ENFP',text});
  assert.equal(a.profile.type,'ISTJ');assert.equal(b.profile.type,'ENFP');assert.notEqual(a.versions[0].text,b.versions[0].text);
 });
 test('live strategy retains explicit preference priority and sender/receiver differences',()=>{
