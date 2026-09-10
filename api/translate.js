@@ -15,7 +15,9 @@ function createHandler({translateImpl=translate,rateLimit=10}={}){
   try{
    const body=typeof req.body==='string'?JSON.parse(req.body):req.body;
    if(Buffer.byteLength(JSON.stringify(body||{}),'utf8')>24576)return res.status(413).json({error:'输入内容过长'});
-   return res.status(200).json(await translateImpl(body));
+   const runtimeToken=req.headers?.['x-vercel-oidc-token'];
+   const env=runtimeToken?{...process.env,VERCEL_OIDC_TOKEN:runtimeToken}:process.env;
+   return res.status(200).json(await translateImpl(body,{env}));
   }catch(error){return res.status(error.status||500).json({error:error.status?error.message:'服务暂时不可用，请重试'});}
  };
 }
