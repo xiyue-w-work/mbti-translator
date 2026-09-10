@@ -35,10 +35,14 @@ async function translate(body,{env=process.env,fetchImpl=fetch}={}){
   if(!isDemoExample(input))throw publicError(DEMO_CUSTOM_INPUT_MESSAGE,503);
   return demoResult(input);
  }
- if(!env.MODEL_API_URL||!env.MODEL_API_KEY||!env.MODEL_NAME)throw publicError('AI 服务尚未配置，请联系开发者',503);
- let url;try{url=new URL(env.MODEL_API_URL);if(url.protocol!=='https:')throw Error();}catch{throw publicError('AI 服务配置不正确',503);}
+ const gatewayToken=env.AI_GATEWAY_API_KEY||env.VERCEL_OIDC_TOKEN;
+ const apiUrl=env.MODEL_API_URL||(gatewayToken?'https://ai-gateway.vercel.sh/v1/chat/completions':'');
+ const apiKey=env.MODEL_API_KEY||gatewayToken;
+ const model=env.MODEL_NAME||(gatewayToken?'openai/gpt-5.4-mini':'');
+ if(!apiUrl||!apiKey||!model)throw publicError('AI 服务尚未配置，请联系开发者',503);
+ let url;try{url=new URL(apiUrl);if(url.protocol!=='https:')throw Error();}catch{throw publicError('AI 服务配置不正确',503);}
  try{
-  const response=await fetchImpl(url.toString(),{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${env.MODEL_API_KEY}`},signal:AbortSignal.timeout(25000),body:JSON.stringify({model:env.MODEL_NAME,messages:[{role:'system',content:SYSTEM+'\n经编辑的沟通策略（理论性倾向，不是个体事实）：'+JSON.stringify(communicationPlan(input))},{role:'user',content:JSON.stringify(input)}],response_format:{type:'json_object'},temperature:0.6,max_tokens:2400})});
+  const response=await fetchImpl(url.toString(),{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${apiKey}`},signal:AbortSignal.timeout(25000),body:JSON.stringify({model,messages:[{role:'system',content:SYSTEM+'\n经编辑的沟通策略（理论性倾向，不是个体事实）：'+JSON.stringify(communicationPlan(input))},{role:'user',content:JSON.stringify(input)}],response_format:{type:'json_object'},temperature:0.6,max_tokens:2400})});
   if(!response.ok)throw publicError('AI 服务暂时不可用，请稍后重试',502);
   const data=await response.json();return {...parseResult(data.choices?.[0]?.message?.content),profile:profileFor(input.theirs)};
  }catch(error){if(error.status)throw error;throw publicError(error.name==='TimeoutError'||error.name==='AbortError'?'生成超时，请重试':'AI 服务连接失败，请稍后重试',502);}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "WEB_LIVE_MODE=true npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/translate.js": {
+      "maxDuration": 30
+    }
+  }
+}

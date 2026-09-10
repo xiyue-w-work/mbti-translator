@@ -2,9 +2,9 @@
 
 把你想说的话，转换成对方更容易理解的表达，同时保留真实意思。
 
-[在线体验](https://xiyue-w-work.github.io/mbti-translator/) · [资料与证据](docs/research/mbti-communication-evidence.md) · [自动检查与发布](https://github.com/xiyue-w-work/mbti-translator/actions)
+[静态示例](https://xiyue-w-work.github.io/mbti-translator/) · [资料与证据](docs/research/mbti-communication-evidence.md) · [自动检查与发布](https://github.com/xiyue-w-work/mbti-translator/actions)
 
-> 当前公开版本为 **人格化场景示例**，不是通用 AI 翻译服务。选择不同接收方 MBTI 可比较表达；自定义原话的生成需接入模型服务。
+GitHub Pages 保留为不发送数据的静态示例。Vercel 生产部署包含 `/api/translate`，通过 AI Gateway 实时处理自定义原话；模型凭证只存在服务端。
 
 ## 体验方式
 
@@ -17,8 +17,10 @@ flowchart LR
   A[微信小程序页面] --> B[共享人格策略与示例]
   C[网页预览适配器] --> A
   C --> D[静态构建]
-  D --> E[GitHub Pages]
-  A -. 配置后启用 .-> F[Node 翻译接口]
+  D --> E[GitHub Pages 静态示例]
+  D --> V[Vercel 在线版]
+  A --> F[Node 翻译接口]
+  V --> F
   F --> G[输入校验与人格策略]
   G --> H[模型供应商 API]
 ```
@@ -32,8 +34,9 @@ flowchart LR
 | `miniprogram/` | 原生微信页面、共享策略、场景示例与请求适配 |
 | `preview/` | 复用 WXML/WXSS 的浏览器预览适配器 |
 | `server/` | 可配置模型接口、校验、超时与开发限流 |
-| `scripts/build-demo.js` | 生成无服务端依赖的 `dist/` |
-| `tests/` | 21 项自动化测试 |
+| `scripts/build-demo.js` | 生成 GitHub 静态示例或 Vercel 在线版 `dist/` |
+| `api/translate.js` | Vercel 在线翻译函数入口与基础限流 |
+| `tests/` | 自动化行为与部署链路检查 |
 | `docs/research/` | 来源、编辑推导与证据边界 |
 | `.github/workflows/pages.yml` | 测试、构建与自动部署 |
 
@@ -47,14 +50,14 @@ npm run build  # 构建静态分享版
 
 ## 发布方式
 
-当前使用 GitHub Pages，主分支通过检查后自动发布 `dist/`；PR 仅检查，不发布。也可在 Vercel 导入该仓库，构建命令使用 `npm run build`，输出目录设为 `dist`，部署同一静态示例。当前不包含 Neon、Cron 或项目雷达功能；它们不属于这个沟通工具的需求。
+GitHub Pages 在主分支通过检查后自动发布静态示例。Vercel 使用 `vercel.json` 执行 `WEB_LIVE_MODE=true npm run build`，同时发布网页和 `/api/translate`；部署内自动提供的 OIDC 凭证用于访问 AI Gateway，默认模型为 `openai/gpt-5.4-mini`。可用 `MODEL_NAME` 覆盖模型。当前不需要数据库或定时任务。
 
 
 微信原生小程序第一版：恋爱、职场、日常三个场景；双方 MBTI；改写原话或组织想法；三个结果版本与继续调整。
 
 ## 当前交付状态
 
-已实现小程序页面、内置场景示例、可配置 AI 服务接口及自动化测试。默认是明确标注的演示模式：场景示例会随接收方 MBTI 改变，结果页可直接切换比较；任意原话、发送者 MBTI 与自由文本偏好尚需真实模型处理。真实模型尚未接入，尚未在微信开发者工具编译或真机验收，也尚未提审发布。
+已实现小程序页面、内置场景示例、可配置 AI 服务接口和 Vercel 在线版。GitHub Pages 默认是明确标注的演示模式；Vercel 版通过 AI Gateway 处理任意原话、发送者与接收者 MBTI、沟通目的及实际偏好。微信开发者工具编译、真机验收和提审仍待完成。
 
 ## 在微信开发者工具体验
 
@@ -69,10 +72,10 @@ npm run build  # 构建静态分享版
 
 需要 Node.js 22 或更新版本，无第三方运行依赖。
 
-1. 复制 `.env.example` 为 `.env`，填入自己选定服务商的完整 HTTPS Chat Completions 地址、模型名称和密钥。密钥只放在服务端；`.env` 已排除 Git 跟踪。
+1. Vercel 生产部署自动使用 `VERCEL_OIDC_TOKEN` 访问 AI Gateway，无需把永久密钥写入项目。本地联调可在 `.env` 填入 `AI_GATEWAY_API_KEY`。也可填写其他 OpenAI 兼容服务的完整 HTTPS Chat Completions 地址、模型名称和密钥；`.env` 已排除 Git 跟踪。
 2. 服务商需兼容 `messages`、`response_format: {type: "json_object"}`、`max_tokens` 及 `choices[0].message.content` 响应格式。不同供应商是否支持这些字段，需要接入时验证。
 3. 运行 `npm start`，默认仅监听 `127.0.0.1:8787`。
-4. 将 `miniprogram/config.js` 中 `demoMode` 设为 `false`，`apiBaseUrl` 设为服务端地址。桌面本地调试可用 `http://127.0.0.1:8787`，开发者工具需要仅在本地调试时关闭合法域名校验。
+4. 网页生产构建会自动切换为同域 `/api/translate`。微信原生项目需将 `miniprogram/config.js` 中 `demoMode` 设为 `false`，`apiBaseUrl` 设为线上服务端地址。
 5. 真机和发布环境使用自己的 HTTPS 服务域名，并完成小程序后台域名配置；手机上的 `127.0.0.1` 不是开发电脑。`DEMO_MODE` 必须为 `false`。
 
 `GET /health` 用于健康检查，`POST /api/translate` 返回三个表达版本。请求正文有 24 KiB 限制；每个直连 IP 每分钟最多 20 次。模型请求 25 秒超时；错误不会包含供应商密钥或原始供应商响应。

@@ -10,7 +10,14 @@
   navigateTo:()=>navigate('result'), navigateBack:()=>navigate('index'), redirectTo:()=>navigate('index'),
   showToast:({title})=>toast(title),
   setClipboardData:async({data,success,fail})=>{try{await navigator.clipboard.writeText(data);success?.();}catch{fail?.();}},
-  request:({fail})=>fail({errMsg:'Preview only supports demo mode'})
+  request:({url,method='GET',data,timeout=30000,header={},success,fail})=>{
+   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);
+   fetch(url,{method,headers:header,body:data===undefined?undefined:JSON.stringify(data),signal:controller.signal})
+    .then(async response=>{let body;try{body=await response.json();}catch{body={};}success?.({statusCode:response.status,data:body});})
+    .catch(error=>fail?.({errMsg:error.name==='AbortError'?'request:fail timeout':'request:fail network'}))
+    .finally(()=>clearTimeout(timer));
+   return {abort:()=>controller.abort()};
+  }
  };
  function load(id) {
   if(cache[id])return cache[id].exports;
@@ -19,8 +26,7 @@
   new Function('require','module','exports',bundle.modules[id])(localRequire,module,module.exports);
   return module.exports;
  }
- // Keep the browser preview offline even if the native app is later configured for live AI.
- load('config.js').demoMode=true;
+ load('config.js');
  function evaluate(expression,scope){return new Function('scope','with(scope){return ('+expression+')}')(scope);}
  function value(raw,scope){if(raw===null)return null;const full=raw.match(/^\{\{([\s\S]*)\}\}$/);if(full)return evaluate(full[1],scope);return raw.replace(/\{\{([\s\S]*?)\}\}/g,(_,exp)=>evaluate(exp,scope)??'');}
  function renderNode(node,scope,parent,skipLoop=false){
