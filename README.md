@@ -72,7 +72,7 @@ GitHub Pages 在主分支通过检查后自动发布静态示例。Vercel 使用
 
 需要 Node.js 22 或更新版本，无第三方运行依赖。
 
-1. Vercel 生产部署自动使用 `VERCEL_OIDC_TOKEN` 访问 AI Gateway，无需把永久密钥写入项目。本地联调可在 `.env` 填入 `AI_GATEWAY_API_KEY`。也可填写其他 OpenAI 兼容服务的完整 HTTPS Chat Completions 地址、模型名称和密钥；`.env` 已排除 Git 跟踪。
+1. 最简单的直连方式是在服务端设置 `OPENAI_API_KEY`，默认调用 OpenAI 的 `gpt-5.4-mini`。Vercel 也可使用 `VERCEL_OIDC_TOKEN` 访问 AI Gateway；本地联调可填 `AI_GATEWAY_API_KEY`。其他 OpenAI 兼容服务可填写完整 HTTPS Chat Completions 地址、模型名称和密钥；`.env` 已排除 Git 跟踪。
 2. 服务商需兼容 `messages`、`response_format: {type: "json_object"}`、`max_tokens` 及 `choices[0].message.content` 响应格式。不同供应商是否支持这些字段，需要接入时验证。
 3. 运行 `npm start`，默认仅监听 `127.0.0.1:8787`。
 4. 网页生产构建会自动切换为同域 `/api/translate`。微信原生项目需将 `miniprogram/config.js` 中 `demoMode` 设为 `false`，`apiBaseUrl` 设为线上服务端地址。

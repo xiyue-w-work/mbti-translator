@@ -37,3 +37,11 @@ test('Vercel deployment uses its automatic OIDC token with AI Gateway defaults',
  assert.equal(called.options.headers.Authorization,'Bearer oidc-token');
  assert.equal(called.body.model,'openai/gpt-5.4-mini');
 });
+test('standard OpenAI API key uses direct OpenAI defaults',async()=>{
+ const versions=['自然直接','温和共情','简短清晰'].map(style=>({style,text:'我想确认一下你通常什么时候方便回复消息。',reason:'保留问题并改为具体询问。'}));
+ let called;
+ await translate({...input,text:'你为什么不回消息？'},{env:{OPENAI_API_KEY:'openai-secret'},fetchImpl:async(url,options)=>{called={url,options,body:JSON.parse(options.body)};return {ok:true,json:async()=>({choices:[{message:{content:JSON.stringify({versions})}}]})};}});
+ assert.equal(called.url,'https://api.openai.com/v1/chat/completions');
+ assert.equal(called.options.headers.Authorization,'Bearer openai-secret');
+ assert.equal(called.body.model,'gpt-5.4-mini');
+});

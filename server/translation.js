@@ -35,10 +35,11 @@ async function translate(body,{env=process.env,fetchImpl=fetch}={}){
   if(!isDemoExample(input))throw publicError(DEMO_CUSTOM_INPUT_MESSAGE,503);
   return demoResult(input);
  }
+ const openAIKey=env.OPENAI_API_KEY;
  const gatewayToken=env.AI_GATEWAY_API_KEY||env.VERCEL_OIDC_TOKEN;
- const apiUrl=env.MODEL_API_URL||(gatewayToken?'https://ai-gateway.vercel.sh/v1/chat/completions':'');
- const apiKey=env.MODEL_API_KEY||gatewayToken;
- const model=env.MODEL_NAME||(gatewayToken?'openai/gpt-5.4-mini':'');
+ const apiUrl=env.MODEL_API_URL||(openAIKey?'https://api.openai.com/v1/chat/completions':gatewayToken?'https://ai-gateway.vercel.sh/v1/chat/completions':'');
+ const apiKey=env.MODEL_API_KEY||openAIKey||gatewayToken;
+ const model=env.MODEL_NAME||(openAIKey?'gpt-5.4-mini':gatewayToken?'openai/gpt-5.4-mini':'');
  if(!apiUrl||!apiKey||!model)throw publicError('AI 服务尚未配置，请联系开发者',503);
  let url;try{url=new URL(apiUrl);if(url.protocol!=='https:')throw Error();}catch{throw publicError('AI 服务配置不正确',503);}
  try{
