@@ -35,7 +35,7 @@ async function translate(body,{env=process.env,fetchImpl=fetch}={}){
   if(!isDemoExample(input))throw publicError(DEMO_CUSTOM_INPUT_MESSAGE,503);
   return demoResult(input);
  }
- const openAIKey=env.OPENAI_API_KEY;
+ const openAIKey=env.OPENAI_API_KEY||env.MBTITranslator;
  const gatewayToken=env.AI_GATEWAY_API_KEY||env.VERCEL_OIDC_TOKEN;
  const apiUrl=env.MODEL_API_URL||(openAIKey?'https://api.openai.com/v1/chat/completions':gatewayToken?'https://ai-gateway.vercel.sh/v1/chat/completions':'');
  const apiKey=env.MODEL_API_KEY||openAIKey||gatewayToken;
