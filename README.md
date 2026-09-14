@@ -57,7 +57,7 @@ GitHub Pages 在主分支通过检查后自动发布静态示例。Vercel 使用
 
 ## 当前交付状态
 
-已实现小程序页面、内置场景示例、可配置 AI 服务接口和 Vercel 在线版。GitHub Pages 默认是明确标注的演示模式；Vercel 版通过 AI Gateway 处理任意原话、发送者与接收者 MBTI、沟通目的及实际偏好。微信开发者工具编译、真机验收和提审仍待完成。
+已实现小程序页面、内置场景示例、可配置 AI 服务接口和 Vercel 在线版。GitHub Pages 默认是明确标注的演示模式；Vercel 版通过服务端模型接口处理任意原话、发送者与接收者 MBTI、沟通目的及实际偏好。微信开发者工具编译、真机验收和提审仍待完成。
 
 ## 在微信开发者工具体验
 
@@ -72,11 +72,12 @@ GitHub Pages 在主分支通过检查后自动发布静态示例。Vercel 使用
 
 需要 Node.js 22 或更新版本，无第三方运行依赖。
 
-1. 最简单的直连方式是在服务端设置 `OPENAI_API_KEY`，默认调用 OpenAI 的 `gpt-5.4-mini`。Vercel 也可使用 `VERCEL_OIDC_TOKEN` 访问 AI Gateway；本地联调可填 `AI_GATEWAY_API_KEY`。其他 OpenAI 兼容服务可填写完整 HTTPS Chat Completions 地址、模型名称和密钥；`.env` 已排除 Git 跟踪。
-2. 服务商需兼容 `messages`、`response_format: {type: "json_object"}`、`max_tokens` 及 `choices[0].message.content` 响应格式。不同供应商是否支持这些字段，需要接入时验证。
-3. 运行 `npm start`，默认仅监听 `127.0.0.1:8787`。
-4. 网页生产构建会自动切换为同域 `/api/translate`。微信原生项目需将 `miniprogram/config.js` 中 `demoMode` 设为 `false`，`apiBaseUrl` 设为线上服务端地址。
-5. 真机和发布环境使用自己的 HTTPS 服务域名，并完成小程序后台域名配置；手机上的 `127.0.0.1` 不是开发电脑。`DEMO_MODE` 必须为 `false`。
+1. 当前公开 Vercel Demo 使用 Gemini 免费层的 OpenAI 兼容接口：`MODEL_API_URL=https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`、`MODEL_NAME=gemini-3.5-flash-lite`，并将 Gemini Key 保存为 Secret 类型的 `MODEL_API_KEY`。免费层的额度和数据使用规则以 Google 当前政策为准。
+2. 也可以只设置 `OPENAI_API_KEY`，默认调用 OpenAI 的 `gpt-5.4-mini`。Vercel 还可使用 `VERCEL_OIDC_TOKEN` 访问 AI Gateway；本地联调可填 `AI_GATEWAY_API_KEY`。其他 OpenAI 兼容服务同样可填写完整 HTTPS Chat Completions 地址、模型名称和密钥；本地 `.env` 文件已排除 Git 跟踪。
+3. 服务商需兼容 `messages`、`response_format: {type: "json_object"}`、`max_tokens` 及 `choices[0].message.content` 响应格式。不同供应商是否支持这些字段，需要接入时验证。
+4. 运行 `npm start`，默认仅监听 `127.0.0.1:8787`。
+5. 网页生产构建会自动切换为同域 `/api/translate`。微信原生项目需将 `miniprogram/config.js` 中 `demoMode` 设为 `false`，`apiBaseUrl` 设为线上服务端地址。
+6. 真机和发布环境使用自己的 HTTPS 服务域名，并完成小程序后台域名配置；手机上的 `127.0.0.1` 不是开发电脑。`DEMO_MODE` 必须为 `false`。
 
 `GET /health` 用于健康检查，`POST /api/translate` 返回三个表达版本。请求正文有 24 KiB 限制；每个直连 IP 每分钟最多 20 次。模型请求 25 秒超时；错误不会包含供应商密钥或原始供应商响应。
 
