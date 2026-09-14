@@ -2,9 +2,9 @@
 
 把你想说的话，转换成对方更容易理解的表达，同时保留真实意思。
 
-[静态示例](https://xiyue-w-work.github.io/mbti-translator/) · [资料与证据](docs/research/mbti-communication-evidence.md) · [自动检查与发布](https://github.com/xiyue-w-work/mbti-translator/actions)
+[在线试用（支持自定义内容）](https://mbti-translator-beta.vercel.app/) · [静态示例](https://xiyue-w-work.github.io/mbti-translator/) · [资料与证据](docs/research/mbti-communication-evidence.md) · [自动检查与发布](https://github.com/xiyue-w-work/mbti-translator/actions)
 
-GitHub Pages 保留为不发送数据的静态示例。Vercel 生产部署包含 `/api/translate`，通过 AI Gateway 实时处理自定义原话；模型凭证只存在服务端。
+GitHub Pages 保留为不发送数据的静态示例。Vercel 生产部署包含 `/api/translate`，通过 Gemini 免费层实时处理自定义原话；模型凭证只存在服务端。
 
 ## 体验方式
 
@@ -25,7 +25,7 @@ flowchart LR
   G --> H[模型供应商 API]
 ```
 
-公开网页只运行离线示例，无模型密钥、无数据库，也不会把输入发送给 AI 服务。服务端代码保留在仓库，方便以后接入真实改写。MBTI 是理论性偏好参考；中文编辑策略尚未通过接受度实验验证。
+GitHub Pages 只运行离线示例，无模型密钥、无数据库，也不会把输入发送给 AI 服务。Vercel 在线版会把用户输入发送到项目服务端及配置的 Gemini 模型，用于生成三种表达。MBTI 是理论性偏好参考；中文编辑策略尚未通过接受度实验验证。
 
 ## 技术与项目结构
 
